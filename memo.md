@@ -45,3 +45,21 @@ mount -v -t ext4 /dev/nvme0n1p4 $LFS
 ### Edit /etc/fstab
 echo "/dev/nvme0n1p3	none	swap	sw	0	0" >> /etc/fstab
 echo "/dev/nvme0n1p4	/mnt/lfs	ext4	defaults	1	1" >> /etc/fstab
+
+# 3. Packages and Patches
+## 3.1. Introduction
+sudo -i
+mkdir -v $LFS/sources
+chmod -v a+wt $LFS/sources
+cd $LFS/sources
+wget https://www.linuxfromscratch.org/lfs/view/stable/wget-list-sysv
+wget --input-file=wget-list-sysv --continue --directory-prefix=$LFS/sources
+wget https://www.linuxfromscratch.org/lfs/view/stable/md5sums
+pushd $LFS/sources
+  md5sum -c md5sums
+popd
+wget https://lfs.gnlug.org/pub/lfs/lfs-packages/12.1/expat-2.6.0.tar.xz --directory-prefix=$LFS/sources
+pushd $LFS/sources
+  md5sum -c md5sums
+popd
+chown root:root $LFS/sources/*
