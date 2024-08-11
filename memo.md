@@ -36,3 +36,12 @@ echo "export LFS=/mnt/lfs" >> ~/.bash_profile
 echo "export LFS=/mnt/lfs" >> ~/.bashrc
 sudo bash -c "echo 'export LFS=/mnt/lfs' >> /root/.bash_profile"
 sudo bash -c "echo 'export LFS=/mnt/lfs' >> /root/.bashrc"
+
+## 2.7. Mounting the New Partition
+sudo -i
+mkdir -pv $LFS
+mount -v -t ext4 /dev/nvme0n1p4 $LFS
+/sbin/swapon -v /dev/nvme0n1p3
+### Edit /etc/fstab
+echo "/dev/nvme0n1p3	none	swap	sw	0	0" >> /etc/fstab
+echo "/dev/nvme0n1p4	/mnt/lfs	ext4	defaults	1	1" >> /etc/fstab
