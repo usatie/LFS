@@ -191,3 +191,15 @@ sed '/RTLDLIST=/s@/usr@@g' -i $LFS/usr/bin/ldd
 echo 'int main(){}' | $LFS_TGT-gcc -xc -
 readelf -l a.out | grep ld-linux
 rm -v a.out 
+
+
+## 5.6. Libstdc++ from GCC-13.2.0
+cd $LFS/sources/
+cd gcc-13.2.0
+mkdir -v build-libstdc++
+cd build-libstdc++/
+../libstdc++-v3/configure               --host=$LFS_TGT                     --build=$(../config.guess)          --prefix=/usr                       --disable-multilib                  --disable-nls                       --disable-libstdcxx-pch             --with-gxx-include-dir=/tools/$LFS_TGT/include/c++/13.2.0
+make
+make DESTDIR=$LFS install
+rm -v $LFS/usr/lib/lib{stdc++{,exp,fs},supc++}.la
+
