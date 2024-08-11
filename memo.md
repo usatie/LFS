@@ -152,3 +152,15 @@ time { ../configure                      --target=$LFS_TGT             --prefix=
 cd ..
 $LFS_TGT-gcc -print-libgcc-file-name
 cat gcc/limitx.h gcc/glimits.h gcc/limity.h >   `dirname $($LFS_TGT-gcc -print-libgcc-file-name)`/include/limits.h
+
+## 5.4. Linux-6.7.4 API Headers
+### 5.4.1. Installation of Linux API Headers
+tar -xvf linux-6.7.4.tar.xz
+cd linux-6.7.4
+
+make mrproper
+
+make headers
+find usr/include -type f ! -name '*.h' -delete
+cp -rv usr/include $LFS/usr
+
