@@ -87,6 +87,10 @@ case $(uname -m) in
   x86_64) chown -v lfs $LFS/lib64 ;;
 esac
 su - lfs
+### fix ($LFS/tools not found)
+sudo -i
+mkdir $LFS/tools
+chown -v lfs $LFS/tools
 
 ## 4.4. Setting Up the Environment
 ### (As lfs user)
@@ -118,3 +122,33 @@ source ~/.bash_profile
 ### (As root)
 sudo -i
 [ ! -e /etc/bash.bashrc ] || mv -v /etc/bash.bashrc /etc/bash.bashrc.NOUSE
+
+## 5.2 Binutils-2.42 - Pass 1
+su - lfs
+bash version-check.sh 
+
+cd $LFS/sources
+tar -xvf binutils-2.42.tar.xz
+cd binutils-2.42
+mkdir -v build
+cd build/
+time { ../configure --prefix=$LFS/tools --with-sysroot=$LFS --target=$LFS_TGT --disable-nls --enable-gprofng=no --disable-werror --enable-default-hash-style=gnu && make && make install; }
+
+## 5.3. GCC-13.2.0 - Pass 1
+tar -xvf gcc-13.2.0.tar.xz 
+cd gcc-13.2.0
+
+tar -xf ../mpfr-4.2.1.tar.xz
+mv -v mpfr-4.2.1 mpfr
+tar -xf ../gmp-6.3.0.tar.xz
+mv -v gmp-6.3.0 gmp
+tar -xf ../mpc-1.3.1.tar.gz
+mv -v mpc-1.3.1 mpc
+
+mkdir -v build
+cd       build
+
+time { ../configure                      --target=$LFS_TGT             --prefix=$LFS/tools           --with-glibc-version=2.39     --with-sysroot=$LFS           --with-newlib                 --without-headers             --enable-default-pie          --enable-default-ssp          --disable-nls                 --disable-shared              --disable-multilib            --disable-threads             --disable-libatomic           --disable-libgomp             --disable-libquadmath         --disable-libssp              --disable-libvtv              --disable-libstdcxx           --enable-languages=c,c++ && make && make install; }
+cd ..
+$LFS_TGT-gcc -print-libgcc-file-name
+cat gcc/limitx.h gcc/glimits.h gcc/limity.h >   `dirname $($LFS_TGT-gcc -print-libgcc-file-name)`/include/limits.h
