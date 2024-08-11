@@ -1,0 +1,21 @@
+F
+n
+3
+
++8G
+t
+3
+Linux swap
+n
+4
+
++20G
+n
+5
+
++1
+t
+5
+BIOS boot
+p
+q
