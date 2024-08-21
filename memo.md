@@ -73,8 +73,16 @@ for i in bin lib sbin; do
   ln -sv usr/$i $LFS/$i
 done
 
+// case $(uname -m) in
+//   x86_64) mkdir -pv $LFS/lib64 ;;
+// esac
+
+mkdir -pv $LFS/tools
+
+// This is for ARM mac
 case $(uname -m) in
   x86_64) mkdir -pv $LFS/lib64 ;;
+  aarch64) mkdir -pv $LFS/lib64 ;;
 esac
 
 ## 4.3 Adding the LFS User
@@ -83,14 +91,15 @@ groupadd lfs
 useradd -s /bin/bash -g lfs -m -k /dev/null lfs
 passwd lfs
 chown -v lfs $LFS/{usr{,/*},lib,var,etc,bin,sbin,tools}
+// case $(uname -m) in
+//   x86_64) chown -v lfs $LFS/lib64 ;;
+// esac
+// This is for ARM mac
 case $(uname -m) in
   x86_64) chown -v lfs $LFS/lib64 ;;
+  aarch64) chown -v lfs $LFS/lib64 ;; 
 esac
 su - lfs
-### fix ($LFS/tools not found)
-sudo -i
-mkdir $LFS/tools
-chown -v lfs $LFS/tools
 
 ## 4.4. Setting Up the Environment
 ### (As lfs user)
@@ -135,6 +144,7 @@ cd build/
 time { ../configure --prefix=$LFS/tools --with-sysroot=$LFS --target=$LFS_TGT --disable-nls --enable-gprofng=no --disable-werror --enable-default-hash-style=gnu && make && make install; }
 
 ## 5.3. GCC-13.2.0 - Pass 1
+cd $LFS/sources
 tar -xvf gcc-13.2.0.tar.xz 
 cd gcc-13.2.0
 
@@ -144,6 +154,17 @@ tar -xf ../gmp-6.3.0.tar.xz
 mv -v gmp-6.3.0 gmp
 tar -xf ../mpc-1.3.1.tar.gz
 mv -v mpc-1.3.1 mpc
+
+case $(uname -m) in
+  x86_64)
+   sed -e '/m64=/s/lib64/lib/' \
+       -i.orig gcc/config/i386/t-linux64
+ ;;
+  aarch64)
+   sed -e '/mabi.lp64=/s/lib64/lib/' \
+       -i.orig gcc/config/aarch64/t-aarch64-linux 
+ ;;
+esac
 
 mkdir -v build
 cd       build
@@ -155,6 +176,7 @@ cat gcc/limitx.h gcc/glimits.h gcc/limity.h >   `dirname $($LFS_TGT-gcc -print-l
 
 ## 5.4. Linux-6.7.4 API Headers
 ### 5.4.1. Installation of Linux API Headers
+cd $LFS/sources
 tar -xvf linux-6.7.4.tar.xz
 cd linux-6.7.4
 
@@ -167,6 +189,7 @@ cp -rv usr/include $LFS/usr
 ## 5.5. Glibc-2.39
 ### 5.5.1. Installation of Glibc
 su - lfs
+cd $LFS/sources
 tar -xvf glibc-2.39.tar.xz
 cd glibc-2.39
 
@@ -175,6 +198,9 @@ case $(uname -m) in
     ;;
     x86_64) ln -sfv ../lib/ld-linux-x86-64.so.2 $LFS/lib64
             ln -sfv ../lib/ld-linux-x86-64.so.2 $LFS/lib64/ld-lsb-x86-64.so.3
+    ;;
+    aarch64) ln -sfv ../lib/ld-linux-aarch64.so.1 $LFS/lib64
+             ln -sfv ../lib/ld-linux-aarch64.so.1 $LFS/lib64/ld-lsb-aarch64.so.3
     ;;
 esac
 
