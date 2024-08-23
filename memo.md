@@ -216,6 +216,9 @@ sed '/RTLDLIST=/s@/usr@@g' -i $LFS/usr/bin/ldd
 
 echo 'int main(){}' | $LFS_TGT-gcc -xc -
 readelf -l a.out | grep ld-linux
+```
+      [Requesting program interpreter: /lib/ld-linux-aarch64.so.1]
+```
 rm -v a.out 
 
 
