@@ -356,3 +356,12 @@ tar -xvf gzip-1.13.tar.xz && cd gzip-1.13
 ./configure --prefix=/usr --host=$LFS_TGT
 make
 make DESTDIR=$LFS install
+
+## 6.12. Make-4.4.1
+tar -xvf make-4.4.1.tar.gz && cd make-4.4.1 
+./configure --prefix=/usr   \
+            --without-guile \
+            --host=$LFS_TGT \
+            --build=$(build-aux/config.guess)
+make
+make DESTDIR=$LFS install
