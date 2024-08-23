@@ -242,3 +242,54 @@ cd m4-1.4.19
             --build=$(build-aux/config.guess)
 make
 make DESTDIR=$LFS install
+
+## 6.3.1. Installation of Ncurses
+tar -xvf ncurses-6.4-20230520.tar.xz 
+cd ncurses-6.4-20230520
+sed -i s/mawk// configure
+mkdir build
+pushd build
+  ../configure
+  make -C include
+  make -C progs tic
+popd
+./configure --prefix=/usr                \
+            --host=$LFS_TGT              \
+            --build=$(./config.guess)    \
+            --mandir=/usr/share/man      \
+            --with-manpage-format=normal \
+            --with-shared                \
+            --without-normal             \
+            --with-cxx-shared            \
+            --without-debug              \
+            --without-ada                \
+            --disable-stripping
+make
+make DESTDIR=$LFS TIC_PATH=$(pwd)/build/progs/tic install
+ln -sv libncursesw.so $LFS/usr/lib/libncurses.so
+sed -e 's/^#if.*XOPEN.*$/#if 1/' \
+    -i $LFS/usr/include/curses.h
+
+### Errors
+What should I do?
+```
+$ ln -sv libncursesw.so $LFS/usr/lib/libncurses.so
+ln: failed to create symbolic link '/mnt/lfs/usr/lib/libncurses.so': File exists
+$ ls -la $LFS/usr/lib/ | grep curses
+lrwxrwxrwx 1 lfs lfs        17 Aug 23 12:41 libcurses.so -> libncurses.so.6.4
+lrwxrwxrwx 1 lfs lfs        15 Aug 23 12:41 libncurses.so -> libncurses.so.6
+lrwxrwxrwx 1 lfs lfs        17 Aug 23 12:41 libncurses.so.6 -> libncurses.so.6.4
+-rwxr-xr-x 1 lfs lfs    452136 Aug 23 12:41 libncurses.so.6.4
+```
+
+## 6.4. Bash-5.2.32
+tar -xvf bash-5.2.21.tar.gz
+cd bash-5.2.21
+./configure --prefix=/usr                      \
+            --build=$(sh support/config.guess) \
+            --host=$LFS_TGT                    \
+            --without-bash-malloc              \
+            bash_cv_strtold_broken=no
+make
+make DESTDIR=$LFS install
+ln -sv bash $LFS/bin/sh
