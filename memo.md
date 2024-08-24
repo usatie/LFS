@@ -365,3 +365,37 @@ tar -xvf make-4.4.1.tar.gz && cd make-4.4.1
             --build=$(build-aux/config.guess)
 make
 make DESTDIR=$LFS install
+
+## 6.13. Patch-2.7.6
+tar -xvf patch-2.7.6.tar.xz && cd patch-2.7.6
+./configure --prefix=/usr   \
+            --host=$LFS_TGT \
+            --build=$(build-aux/config.guess)
+make
+make DESTDIR=$LFS install
+
+## 6.14. Sed-4.9
+tar -xvf sed-4.9.tar.xz && cd sed-4.9
+./configure --prefix=/usr   \
+            --host=$LFS_TGT \
+            --build=$(./build-aux/config.guess)
+make
+make DESTDIR=$LFS install
+
+## 6.15. Tar-1.35
+tar -xvf tar-1.35.tar.xz && cd tar-1.35
+./configure --prefix=/usr                     \
+            --host=$LFS_TGT                   \
+            --build=$(build-aux/config.guess)
+make
+make DESTDIR=$LFS install
+
+## 6.16. Xz-5.6.2
+tar -xvf xz-5.4.6.tar.xz && cd xz-5.4.6
+./configure --prefix=/usr                     \
+            --host=$LFS_TGT                   \
+            --build=$(build-aux/config.guess) \
+            --disable-static                  \
+            --docdir=/usr/share/doc/xz-5.6.2
+make
+make DESTDIR=$LFS install
