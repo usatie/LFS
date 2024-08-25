@@ -73,17 +73,12 @@ for i in bin lib sbin; do
   ln -sv usr/$i $LFS/$i
 done
 
-// case $(uname -m) in
-//   x86_64) mkdir -pv $LFS/lib64 ;;
-// esac
-
-mkdir -pv $LFS/tools
-
-// This is for ARM mac
 case $(uname -m) in
   x86_64) mkdir -pv $LFS/lib64 ;;
   aarch64) mkdir -pv $LFS/lib64 ;;
 esac
+
+mkdir -pv $LFS/tools
 
 ## 4.3 Adding the LFS User
 sudo -i
@@ -91,10 +86,6 @@ groupadd lfs
 useradd -s /bin/bash -g lfs -m -k /dev/null lfs
 passwd lfs
 chown -v lfs $LFS/{usr{,/*},lib,var,etc,bin,sbin,tools}
-// case $(uname -m) in
-//   x86_64) chown -v lfs $LFS/lib64 ;;
-// esac
-// This is for ARM mac
 case $(uname -m) in
   x86_64) chown -v lfs $LFS/lib64 ;;
   aarch64) chown -v lfs $LFS/lib64 ;; 
@@ -141,7 +132,7 @@ tar -xvf binutils-2.42.tar.xz
 cd binutils-2.42
 mkdir -v build
 cd build/
-time { ../configure --prefix=$LFS/tools --with-sysroot=$LFS --target=$LFS_TGT --disable-nls --enable-gprofng=no --disable-werror --enable-default-hash-style=gnu && make && make install; }
+time { ../configure --prefix=$LFS/tools --with-sysroot=$LFS --target=$LFS_TGT --disable-nls --enable-gprofng=no --disable-werror --enable-new-dtags --enable-default-hash-style=gnu && make && make install; } | tee output
 
 ## 5.3. GCC-13.2.0 - Pass 1
 cd $LFS/sources
