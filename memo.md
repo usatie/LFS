@@ -747,3 +747,14 @@ umount $LFS/{sys,proc,run,dev}
 
 cd $LFS
 tar -cJpf $HOME/lfs-temp-tools-12.1-systemd.tar.xz .
+
+```
+chroot "$LFS" /usr/bin/env -i   \
+    HOME=/root                  \
+    TERM="$TERM"                \
+    PS1='(lfs chroot) \u:\w\$ ' \
+    PATH=/usr/bin:/usr/sbin     \
+    MAKEFLAGS="-j$(nproc)"      \
+    TESTSUITEFLAGS="-j$(nproc)" \
+    /bin/bash --login
+```
