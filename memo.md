@@ -330,10 +330,20 @@ sed -i 's/extras//' Makefile.in
 make
 make DESTDIR=$LFS install
 
+## 6.10. Grep-3.11
+cd $LFS/sources/
+tar -xvf grep-3.11.tar.xz && cd grep-3.11
+./configure --prefix=/usr   \
+            --host=$LFS_TGT \
+            --build=$(./build-aux/config.guess)
+make
+make DESTDIR=$LFS install
+
+
 ## 6.11. Gzip-1.13
 cd $LFS/sources/
 tar -xvf gzip-1.13.tar.xz && cd gzip-1.13
-./configure --prefix=/usr --host=$LFS_TGT --build=$(./build-aux/config.guess)
+./configure --prefix=/usr --host=$LFS_TGT
 make
 make DESTDIR=$LFS install
 
