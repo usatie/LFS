@@ -347,7 +347,105 @@ tar -xvf gzip-1.13.tar.xz && cd gzip-1.13
 make
 make DESTDIR=$LFS install
 
+### Error
+```
+make[2]: Entering directory '/mnt/lfs/sources/gzip-1.13'
+  CC       gzip.o
+  CC       trees.o
+  CC       unlzh.o
+  CC       unlzw.o
+In file included from gzip.c:75:
+./lib/getopt.h:84:10: fatal error: getopt-cdefs.h: No such file or directory
+   84 | #include <getopt-cdefs.h>
+      |          ^~~~~~~~~~~~~~~~
+compilation terminated.
+make[2]: *** [Makefile:1946: gzip.o] Error 1
+make[2]: *** Waiting for unfinished jobs....
+make[2]: Leaving directory '/mnt/lfs/sources/gzip-1.13'
+make[1]: *** [Makefile:2011: install-recursive] Error 1
+make[1]: Leaving directory '/mnt/lfs/sources/gzip-1.13'
+make: *** [Makefile:2320: install] Error 2
+lfs:/mnt/lfs/sources/gzip-1.13$ make
+make  all-recursive
+make[1]: Entering directory '/mnt/lfs/sources/gzip-1.13'
+Making all in lib
+make[2]: Entering directory '/mnt/lfs/sources/gzip-1.13/lib'
+make  all-am
+make[3]: Entering directory '/mnt/lfs/sources/gzip-1.13/lib'
+make[3]: Leaving directory '/mnt/lfs/sources/gzip-1.13/lib'
+make[2]: Leaving directory '/mnt/lfs/sources/gzip-1.13/lib'
+Making all in doc
+make[2]: Entering directory '/mnt/lfs/sources/gzip-1.13/doc'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/mnt/lfs/sources/gzip-1.13/doc'
+Making all in .
+make[2]: Entering directory '/mnt/lfs/sources/gzip-1.13'
+  CC       gzip.o
+  CC       unpack.o
+  CC       unzip.o
+  CC       util.o
+In file included from gzip.c:75:
+./lib/getopt.h:84:10: fatal error: getopt-cdefs.h: No such file or directory
+   84 | #include <getopt-cdefs.h>
+      |          ^~~~~~~~~~~~~~~~
+compilation terminated.
+make[2]: *** [Makefile:1946: gzip.o] Error 1
+make[2]: *** Waiting for unfinished jobs....
+make[2]: Leaving directory '/mnt/lfs/sources/gzip-1.13'
+make[1]: *** [Makefile:2011: all-recursive] Error 1
+make[1]: Leaving directory '/mnt/lfs/sources/gzip-1.13'
+make: *** [Makefile:1792: all] Error 2
+lfs:/mnt/lfs/sources/gzip-1.13$ make DESTDIR=$LFS install
+make  install-recursive
+make[1]: Entering directory '/mnt/lfs/sources/gzip-1.13'
+Making install in lib
+make[2]: Entering directory '/mnt/lfs/sources/gzip-1.13/lib'
+make  install-am
+make[3]: Entering directory '/mnt/lfs/sources/gzip-1.13/lib'
+make[4]: Entering directory '/mnt/lfs/sources/gzip-1.13/lib'
+make[4]: Nothing to be done for 'install-exec-am'.
+make[4]: Nothing to be done for 'install-data-am'.
+make[4]: Leaving directory '/mnt/lfs/sources/gzip-1.13/lib'
+make[3]: Leaving directory '/mnt/lfs/sources/gzip-1.13/lib'
+make[2]: Leaving directory '/mnt/lfs/sources/gzip-1.13/lib'
+Making install in doc
+make[2]: Entering directory '/mnt/lfs/sources/gzip-1.13/doc'
+make[3]: Entering directory '/mnt/lfs/sources/gzip-1.13/doc'
+make[3]: Nothing to be done for 'install-exec-am'.
+ /usr/bin/mkdir -p '/mnt/lfs/usr/share/info'
+ /usr/bin/install -c -m 644 ./gzip.info '/mnt/lfs/usr/share/info'
+ install-info --info-dir='/mnt/lfs/usr/share/info' '/mnt/lfs/usr/share/info/gzip.info'
+make[3]: Leaving directory '/mnt/lfs/sources/gzip-1.13/doc'
+make[2]: Leaving directory '/mnt/lfs/sources/gzip-1.13/doc'
+Making install in .
+make[2]: Entering directory '/mnt/lfs/sources/gzip-1.13'
+  CC       gzip.o
+  CC       zip.o
+  CC       version.o
+  AR       libver.a
+In file included from gzip.c:75:
+./lib/getopt.h:84:10: fatal error: getopt-cdefs.h: No such file or directory
+   84 | #include <getopt-cdefs.h>
+      |          ^~~~~~~~~~~~~~~~
+compilation terminated.
+make[2]: *** [Makefile:1946: gzip.o] Error 1
+make[2]: *** Waiting for unfinished jobs....
+make[2]: Leaving directory '/mnt/lfs/sources/gzip-1.13'
+make[1]: *** [Makefile:2011: install-recursive] Error 1
+make[1]: Leaving directory '/mnt/lfs/sources/gzip-1.13'
+make: *** [Makefile:2320: install] Error 2
+```
+
+`make clean` fixed the error above
+https://www.linuxquestions.org/questions/linux-from-scratch-13/configure-file-not-creating-getopt-cdefs-h-from-it%27s-in-h-file-grep-3-11-a-4175734112/
+```
+make clean
+make
+make DESTDIR=$LFS install
+```
+
 ## 6.12. Make-4.4.1
+cd $LFS/sources/
 tar -xvf make-4.4.1.tar.gz && cd make-4.4.1 
 ./configure --prefix=/usr   \
             --without-guile \
@@ -357,6 +455,7 @@ make
 make DESTDIR=$LFS install
 
 ## 6.13. Patch-2.7.6
+cd $LFS/sources/
 tar -xvf patch-2.7.6.tar.xz && cd patch-2.7.6
 ./configure --prefix=/usr   \
             --host=$LFS_TGT \
@@ -365,6 +464,7 @@ make
 make DESTDIR=$LFS install
 
 ## 6.14. Sed-4.9
+cd $LFS/sources/
 tar -xvf sed-4.9.tar.xz && cd sed-4.9
 ./configure --prefix=/usr   \
             --host=$LFS_TGT \
@@ -373,6 +473,7 @@ make
 make DESTDIR=$LFS install
 
 ## 6.15. Tar-1.35
+cd $LFS/sources/
 tar -xvf tar-1.35.tar.xz && cd tar-1.35
 ./configure --prefix=/usr                     \
             --host=$LFS_TGT                   \
@@ -381,12 +482,13 @@ make
 make DESTDIR=$LFS install
 
 ## 6.16. Xz-5.6.2
+cd $LFS/sources/
 tar -xvf xz-5.4.6.tar.xz && cd xz-5.4.6
 ./configure --prefix=/usr                     \
             --host=$LFS_TGT                   \
             --build=$(build-aux/config.guess) \
             --disable-static                  \
-            --docdir=/usr/share/doc/xz-5.6.2
+            --docdir=/usr/share/doc/xz-5.4.6
 make
 make DESTDIR=$LFS install
 rm -v $LFS/usr/lib/liblzma.la
