@@ -400,3 +400,65 @@ tar -xvf xz-5.4.6.tar.xz && cd xz-5.4.6
 make
 make DESTDIR=$LFS install
 rm -v $LFS/usr/lib/liblzma.la
+
+## 6.17. Binutils-2.43.1 - Pass 2
+sed '6009s/$add_dir//' -i ltmain.sh
+mkdir build2 && cd build2
+../configure                   \
+    --prefix=/usr              \
+    --build=$(../config.guess) \
+    --host=$LFS_TGT            \
+    --disable-nls              \
+    --enable-shared            \
+    --enable-gprofng=no        \
+    --disable-werror           \
+    --enable-64-bit-bfd        \
+    --enable-new-dtags         \
+    --enable-default-hash-style=gnu
+make
+make DESTDIR=$LFS install
+rm -v $LFS/usr/lib/lib{bfd,ctf,ctf-nobfd,opcodes,sframe}.{a,la}
+
+## 6.18. GCC-14.2.0 - Pass 2
+tar -xvf gcc-13.2.0.tar.xz && cd gcc-13.2.0
+tar -xf ../mpfr-4.2.1.tar.xz
+mv -v mpfr-4.2.1 mpfr
+tar -xf ../gmp-6.3.0.tar.xz
+mv -v gmp-6.3.0 gmp
+tar -xf ../mpc-1.3.1.tar.gz
+mv -v mpc-1.3.1 mpc
+case $(uname -m) in
+  x86_64)
+   sed -e '/m64=/s/lib64/lib/' \
+       -i.orig gcc/config/i386/t-linux64
+ ;;
+  aarch64)
+   sed -e '/mabi.lp64=/s/lib64/lib/' \
+       -i.orig gcc/config/aarch64/t-aarch64-linux 
+ ;;
+esac
+sed '/thread_header =/s/@.*@/gthr-posix.h/' \
+    -i libgcc/Makefile.in libstdc++-v3/include/Makefile.in
+mkdir -v build
+cd       build
+../configure                                       \
+    --build=$(../config.guess)                     \
+    --host=$LFS_TGT                                \
+    --target=$LFS_TGT                              \
+    LDFLAGS_FOR_TARGET=-L$PWD/$LFS_TGT/libgcc      \
+    --prefix=/usr                                  \
+    --with-build-sysroot=$LFS                      \
+    --enable-default-pie                           \
+    --enable-default-ssp                           \
+    --disable-nls                                  \
+    --disable-multilib                             \
+    --disable-libatomic                            \
+    --disable-libgomp                              \
+    --disable-libquadmath                          \
+    --disable-libsanitizer                         \
+    --disable-libssp                               \
+    --disable-libvtv                               \
+    --enable-languages=c,c++
+make
+make DESTDIR=$LFS install
+ln -sv gcc $LFS/usr/bin/cc
