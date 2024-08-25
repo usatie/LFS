@@ -128,16 +128,14 @@ su - lfs
 bash version-check.sh 
 
 cd $LFS/sources
-tar -xvf binutils-2.42.tar.xz
-cd binutils-2.42
+tar -xvf binutils-2.42.tar.xz && cd binutils-2.42
 mkdir -v build
 cd build/
-time { ../configure --prefix=$LFS/tools --with-sysroot=$LFS --target=$LFS_TGT --disable-nls --enable-gprofng=no --disable-werror --enable-new-dtags --enable-default-hash-style=gnu && make && make install; } | tee output
+time { ../configure --prefix=$LFS/tools --with-sysroot=$LFS --target=$LFS_TGT --disable-nls --enable-gprofng=no --disable-werror --enable-default-hash-style=gnu && make && make install; } | tee output
 
 ## 5.3. GCC-13.2.0 - Pass 1
 cd $LFS/sources
-tar -xvf gcc-13.2.0.tar.xz 
-cd gcc-13.2.0
+tar -xvf gcc-13.2.0.tar.xz  && cd gcc-13.2.0
 
 tar -xf ../mpfr-4.2.1.tar.xz
 mv -v mpfr-4.2.1 mpfr
@@ -160,7 +158,7 @@ esac
 mkdir -v build
 cd       build
 
-time { ../configure                      --target=$LFS_TGT             --prefix=$LFS/tools           --with-glibc-version=2.39     --with-sysroot=$LFS           --with-newlib                 --without-headers             --enable-default-pie          --enable-default-ssp          --disable-nls                 --disable-shared              --disable-multilib            --disable-threads             --disable-libatomic           --disable-libgomp             --disable-libquadmath         --disable-libssp              --disable-libvtv              --disable-libstdcxx           --enable-languages=c,c++ && make && make install; }
+time { ../configure --target=$LFS_TGT --prefix=$LFS/tools --with-glibc-version=2.39 --with-sysroot=$LFS --with-newlib --without-headers --enable-default-pie --enable-default-ssp --disable-nls --disable-shared --disable-multilib --disable-threads --disable-libatomic --disable-libgomp --disable-libquadmath --disable-libssp --disable-libvtv --disable-libstdcxx --enable-languages=c,c++ && make && make install; } | tee output
 cd ..
 $LFS_TGT-gcc -print-libgcc-file-name
 cat gcc/limitx.h gcc/glimits.h gcc/limity.h >   `dirname $($LFS_TGT-gcc -print-libgcc-file-name)`/include/limits.h
@@ -168,21 +166,16 @@ cat gcc/limitx.h gcc/glimits.h gcc/limity.h >   `dirname $($LFS_TGT-gcc -print-l
 ## 5.4. Linux-6.7.4 API Headers
 ### 5.4.1. Installation of Linux API Headers
 cd $LFS/sources
-tar -xvf linux-6.7.4.tar.xz
-cd linux-6.7.4
+tar -xvf linux-6.7.4.tar.xz && cd linux-6.7.4
 
-make mrproper
+time { make mrproper && make headers && find usr/include -type f ! -name '*.h' -delete && cp -rv usr/include $LFS/usr; } | tee output
 
-make headers
-find usr/include -type f ! -name '*.h' -delete
-cp -rv usr/include $LFS/usr
 
 ## 5.5. Glibc-2.39
 ### 5.5.1. Installation of Glibc
 su - lfs
 cd $LFS/sources
-tar -xvf glibc-2.39.tar.xz
-cd glibc-2.39
+tar -xvf glibc-2.39.tar.xz && cd glibc-2.39
 
 case $(uname -m) in
     i?86)   ln -sfv ld-linux.so.2 $LFS/lib/ld-lsb.so.3
@@ -201,7 +194,7 @@ mkdir -v build
 cd       build
 
 echo "rootsbindir=/usr/sbin" > configparms
-time { ../configure                                   --prefix=/usr                            --host=$LFS_TGT                          --build=$(../scripts/config.guess)       --enable-kernel=4.19                     --with-headers=$LFS/usr/include          --disable-nscd                           libc_cv_slibdir=/usr/lib && make && make DESTDIR=$LFS install; }
+time { ../configure  --prefix=/usr --host=$LFS_TGT --build=$(../scripts/config.guess) --enable-kernel=4.19 --with-headers=$LFS/usr/include --disable-nscd libc_cv_slibdir=/usr/lib && make && make DESTDIR=$LFS install; } | tee output
 
 sed '/RTLDLIST=/s@/usr@@g' -i $LFS/usr/bin/ldd
 
@@ -215,28 +208,23 @@ rm -v a.out
 
 ## 5.6. Libstdc++ from GCC-13.2.0
 cd $LFS/sources/
-cd gcc-13.2.0
-mkdir -v build-libstdc++
-cd build-libstdc++/
-../libstdc++-v3/configure               --host=$LFS_TGT                     --build=$(../config.guess)          --prefix=/usr                       --disable-multilib                  --disable-nls                       --disable-libstdcxx-pch             --with-gxx-include-dir=/tools/$LFS_TGT/include/c++/13.2.0
-make
-make DESTDIR=$LFS install
+mv gcc-13.2.0 gcc-13.2.0.gcc-pass1
+tar -xvf gcc-13.2.0.tar.xz && cd gcc-13.2.0
+mkdir -v build
+cd       build
+time { ../libstdc++-v3/configure --host=$LFS_TGT --build=$(../config.guess) --prefix=/usr --disable-multilib --disable-nls --disable-libstdcxx-pch --with-gxx-include-dir=/tools/$LFS_TGT/include/c++/13.2.0 && make && make DESTDIR=$LFS install; } | tee output
 rm -v $LFS/usr/lib/lib{stdc++{,exp,fs},supc++}.la
 
 
 ## 6.2. M4-1.4.19
 su - lfs
-tar -xvf m4-1.4.19.tar.xz
-cd m4-1.4.19
-./configure --prefix=/usr   \
-            --host=$LFS_TGT \
-            --build=$(build-aux/config.guess)
-make
-make DESTDIR=$LFS install
+cd $LFS/sources/
+tar -xvf m4-1.4.19.tar.xz && cd m4-1.4.19
+time { ./configure --prefix=/usr --host=$LFS_TGT --build=$(build-aux/config.guess) && make && make DESTDIR=$LFS install; } | tee output
 
 ## 6.3.1. Installation of Ncurses
-tar -xvf ncurses-6.4-20230520.tar.xz 
-cd ncurses-6.4-20230520
+cd $LFS/sources/
+tar -xvf ncurses-6.4-20230520.tar.xz && cd ncurses-6.4-20230520
 sed -i s/mawk// configure
 mkdir build
 pushd build
@@ -254,15 +242,16 @@ popd
             --with-cxx-shared            \
             --without-debug              \
             --without-ada                \
-            --disable-stripping
-make
-make DESTDIR=$LFS TIC_PATH=$(pwd)/build/progs/tic install
+            --disable-stripping          \
+	    --enable-widec
+make && make DESTDIR=$LFS TIC_PATH=$(pwd)/build/progs/tic install
 ln -sv libncursesw.so $LFS/usr/lib/libncurses.so
 sed -e 's/^#if.*XOPEN.*$/#if 1/' \
     -i $LFS/usr/include/curses.h
 
 ### Errors
 What should I do?
+> This was because I forgot `--enable-widec` option when configure
 ```
 $ ln -sv libncursesw.so $LFS/usr/lib/libncurses.so
 ln: failed to create symbolic link '/mnt/lfs/usr/lib/libncurses.so': File exists
