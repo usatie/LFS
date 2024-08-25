@@ -263,8 +263,8 @@ lrwxrwxrwx 1 lfs lfs        17 Aug 23 12:41 libncurses.so.6 -> libncurses.so.6.4
 ```
 
 ## 6.4. Bash-5.2.32
-tar -xvf bash-5.2.21.tar.gz
-cd bash-5.2.21
+cd $LFS/sources/
+tar -xvf bash-5.2.21.tar.gz && cd bash-5.2.21
 ./configure --prefix=/usr                      \
             --build=$(sh support/config.guess) \
             --host=$LFS_TGT                    \
@@ -275,31 +275,28 @@ make DESTDIR=$LFS install
 ln -sv bash $LFS/bin/sh
 
 ## 6.5. Coreutils-9.5
-tar -xvf coreutils-9.4.tar.xz
-cd coreutils-9.4
+cd $LFS/sources/
+tar -xvf coreutils-9.4.tar.xz && cd coreutils-9.4
 ./configure --prefix=/usr                     \
             --host=$LFS_TGT                   \
             --build=$(build-aux/config.guess) \
             --enable-install-program=hostname \
-            --enable-no-install-program=kill,uptime
-make
-make DESTDIR=$LFS install
+            --enable-no-install-program=kill,uptime && make && make DESTDIR=$LFS install
 mv -v $LFS/usr/bin/chroot              $LFS/usr/sbin
 mkdir -pv $LFS/usr/share/man/man8
 mv -v $LFS/usr/share/man/man1/chroot.1 $LFS/usr/share/man/man8/chroot.8
 sed -i 's/"1"/"8"/'                    $LFS/usr/share/man/man8/chroot.8
 
 ## 6.6. Diffutils-3.10
-tar -xvf diffutils-3.10.tar.xz 
-cd diffutils-3.10
+cd $LFS/sources/
+tar -xvf diffutils-3.10.tar.xz && cd diffutils-3.10
 ./configure --prefix=/usr   \
             --host=$LFS_TGT \
-            --build=$(./build-aux/config.guess)
-make
-make DESTDIR=$LFS install
+            --build=$(./build-aux/config.guess) && make && make DESTDIR=$LFS install
 
 ## 6.7. File-5.45
-tar -xvf file-5.45.tar.gz  && cd file-5.45 
+cd $LFS/sources/
+tar -xvf file-5.45.tar.gz && cd file-5.45 
 mkdir build
 pushd build
   ../configure --disable-bzlib      \
@@ -314,6 +311,7 @@ make DESTDIR=$LFS install
 rm -v $LFS/usr/lib/libmagic.la
 
 ## 6.8. Findutils-4.10.0
+cd $LFS/sources/
 tar -xvf findutils-4.9.0.tar.xz && cd findutils-4.9.0 
 ./configure --prefix=/usr                   \
             --localstatedir=/var/lib/locate \
@@ -323,6 +321,7 @@ make
 make DESTDIR=$LFS install
 
 ## 6.9. Gawk-5.3.0
+cd $LFS/sources/
 tar -xvf gawk-5.3.0.tar.xz && cd gawk-5.3.0
 sed -i 's/extras//' Makefile.in
 ./configure --prefix=/usr   \
@@ -332,8 +331,9 @@ make
 make DESTDIR=$LFS install
 
 ## 6.11. Gzip-1.13
+cd $LFS/sources/
 tar -xvf gzip-1.13.tar.xz && cd gzip-1.13
-./configure --prefix=/usr --host=$LFS_TGT
+./configure --prefix=/usr --host=$LFS_TGT --build=$(./build-aux/config.guess)
 make
 make DESTDIR=$LFS install
 
