@@ -896,3 +896,56 @@ include /etc/ld.so.conf.d/*.conf
 
 EOF
 mkdir -pv /etc/ld.so.conf.d
+
+## 8.6. Zlib-1.3.1
+cd /sources/ && tar -xvf zlib-1.3.1.tar.gz && cd zlib-1.3.1
+./configure --prefix=/usr
+make
+make check
+make install
+rm -fv /usr/lib/libz.a
+
+## 8.7. Bzip2-1.0.8
+cd /sources/ && tar -xvf bzip2-1.0.8.tar.gz && cd bzip2-1.0.8
+patch -Np1 -i ../bzip2-1.0.8-install_docs-1.patch
+sed -i 's@\(ln -s -f \)$(PREFIX)/bin/@\1@' Makefile
+sed -i "s@(PREFIX)/man@(PREFIX)/share/man@g" Makefile
+make -f Makefile-libbz2_so
+make clean
+make
+make PREFIX=/usr install
+cp -av libbz2.so.* /usr/lib
+ln -sv libbz2.so.1.0.8 /usr/lib/libbz2.so
+cp -v bzip2-shared /usr/bin/bzip2
+for i in /usr/bin/{bzcat,bunzip2}; do
+  ln -sfv bzip2 $i
+done
+rm -fv /usr/lib/libbz2.a
+
+## 8.16 Expect-5.45.4
+./configure --prefix=/usr           \
+            --with-tcl=/usr/lib     \
+            --enable-shared         \
+            --mandir=/usr/share/man \
+            --with-tclinclude=/usr/include \
+            --build=aarch64-unknown-linux-gnu
+
+## 8.28 GCC-13.2.0
+case $(uname -m) in
+  x86_64)
+   sed -e '/m64=/s/lib64/lib/' \
+       -i.orig gcc/config/i386/t-linux64
+ ;;
+  aarch64)
+   sed -e '/mabi.lp64=/s/lib64/lib/' \
+       -i.orig gcc/config/aarch64/t-aarch64-linux 
+ ;;
+esac
+
+## 10.3 Linux-6.6.7
+cp -iv arch/arm64/boot/Image /boot/vmlinuz-6.x-lfs-systemd 
+
+## 10.4 Using GRUB to Set Up the Boot Process
+grub-install --target=arm64-efi --removable /dev/sda
+
+
