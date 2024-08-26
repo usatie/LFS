@@ -749,6 +749,21 @@ cd $LFS
 tar -cJpf $HOME/lfs-temp-tools-12.1-systemd.tar.xz .
 
 ```
+mkdir -pv $LFS/{dev,proc,sys,run}
+
+mount -v --bind /dev $LFS/dev
+
+mount -vt devpts devpts -o gid=5,mode=0620 $LFS/dev/pts
+mount -vt proc proc $LFS/proc
+mount -vt sysfs sysfs $LFS/sys
+mount -vt tmpfs tmpfs $LFS/run
+
+if [ -h $LFS/dev/shm ]; then
+  install -v -d -m 1777 $LFS$(realpath /dev/shm)
+else
+  mount -vt tmpfs -o nosuid,nodev tmpfs $LFS/dev/shm
+fi
+
 chroot "$LFS" /usr/bin/env -i   \
     HOME=/root                  \
     TERM="$TERM"                \
@@ -758,3 +773,9 @@ chroot "$LFS" /usr/bin/env -i   \
     TESTSUITEFLAGS="-j$(nproc)" \
     /bin/bash --login
 ```
+
+## 8.2. Package Management
+## 8.3. Man-pages-6.06
+cd /sources/ && tar -xvf man-pages-6.06.tar.xz && cd man-pages-6.06
+rm -v man3/crypt*
+make prefix=/usr install
