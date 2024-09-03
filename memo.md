@@ -128,10 +128,14 @@ su - lfs
 bash version-check.sh 
 
 cd $LFS/sources
-tar -xvf binutils-2.42.tar.xz && cd binutils-2.42
+tar -xvf binutils-2.42.tar.xz
+cd binutils-2.42
 mkdir -v build
 cd build/
 time { ../configure --prefix=$LFS/tools --with-sysroot=$LFS --target=$LFS_TGT --disable-nls --enable-gprofng=no --disable-werror --enable-default-hash-style=gnu && make && make install; } | tee output
+
+cd $LFS/sources
+rm -rf binutils-2.42
 
 ## 5.3. GCC-13.2.0 - Pass 1
 cd $LFS/sources
@@ -594,6 +598,7 @@ chroot "$LFS" /usr/bin/env -i   \
 
 ## 7.5. Creating Directories
 mkdir -pv /{boot,home,mnt,opt,srv}
+
 mkdir -pv /etc/{opt,sysconfig}
 mkdir -pv /lib/firmware
 mkdir -pv /media/{floppy,cdrom}
@@ -781,13 +786,17 @@ cd /sources/ && tar -xvf man-pages-6.06.tar.xz && cd man-pages-6.06
 rm -v man3/crypt*
 make prefix=/usr install
 
+cd /sources
+rm -rf man-pages-6.06
+
 ## 8.4. Iana-Etc-20240125
 tar -xvf iana-etc-20240125.tar.gz && cd iana-etc-20240125 
 cp services protocols /etc
 
-## 8.5. Glibc-2.39
 cd /sources
-mv glibc-2.39 glibc-2.39.chapter5.5
+rm -rf iana-etc-20240125
+
+## 8.5. Glibc-2.39
 cd /sources/ && tar xvf glibc-2.39.tar.xz && cd glibc-2.39
 patch -Np1 -i ../glibc-2.39-fhs-1.patch
 mkdir -v build
@@ -895,7 +904,11 @@ cat >> /etc/ld.so.conf << "EOF"
 include /etc/ld.so.conf.d/*.conf
 
 EOF
+
 mkdir -pv /etc/ld.so.conf.d
+
+cd /sources
+rm -rf glibc-2.39
 
 ## 8.6. Zlib-1.3.1
 cd /sources/ && tar -xvf zlib-1.3.1.tar.gz && cd zlib-1.3.1
@@ -904,6 +917,8 @@ make
 make check
 make install
 rm -fv /usr/lib/libz.a
+cd /sources
+rm -rf zlib-1.3.1
 
 ## 8.7. Bzip2-1.0.8
 cd /sources/ && tar -xvf bzip2-1.0.8.tar.gz && cd bzip2-1.0.8
@@ -921,6 +936,8 @@ for i in /usr/bin/{bzcat,bunzip2}; do
   ln -sfv bzip2 $i
 done
 rm -fv /usr/lib/libbz2.a
+cd /sources
+rm -rf bzip2-1.0.8
 
 ## 8.8. Xz-5.4.6
 cd /sources
@@ -932,6 +949,8 @@ cd /sources/ && tar -xvf xz-5.4.6.tar.xz && cd xz-5.4.6
 make
 make check
 make install
+cd /sources
+rm -rf xz-5.4.6
 
 ## 8.9. Zstd-1.5.5
 cd /sources && tar -xvf zstd-1.5.5.tar.gz && cd zstd-1.5.5
@@ -939,14 +958,17 @@ make prefix=/usr
 make check
 make prefix=/usr install
 rm -v /usr/lib/libzstd.a
+cd /sources
+rm -rf zstd-1.5.5
 
 ## 8.10. File-5.45
-mv file-5.45 file-5.45.chapter5
 cd /sources/ && tar -xvf file-5.45.tar.gz && cd file-5.45
 ./configure --prefix=/usr
 make
 make check
 make install
+cd /sources
+rm -rf file-5.45
 
 ## 8.11. Readline-8.2
 cd /sources/ && tar -xvf readline-8.2.tar.gz && cd readline-8.2
@@ -959,6 +981,9 @@ patch -Np1 -i ../readline-8.2-upstream_fixes-3.patch
             --docdir=/usr/share/doc/readline-8.2
 make SHLIB_LIBS="-lncursesw"
 make SHLIB_LIBS="-lncursesw" install
+install -v -m644 doc/*.{ps,pdf,html,dvi} /usr/share/doc/readline-8.2
+cd /sources
+rm -rf readline-8.2
 
 ## 8.12. M4-1.4.19
 cd /sources/ && tar -xvf m4-1.4.19.tar.xz && cd m4-1.4.19 
@@ -966,6 +991,8 @@ cd /sources/ && tar -xvf m4-1.4.19.tar.xz && cd m4-1.4.19
 make
 make check
 make install
+cd /sources
+rm -rf m4-1.4.19
 
 ## 8.13. Bc-6.7.5
 cd /sources/ && tar -xvf bc-6.7.5.tar.xz && cd bc-6.7.5
@@ -973,6 +1000,8 @@ CC=gcc ./configure --prefix=/usr -G -O3 -r
 make
 make test
 make install
+cd /sources
+rm -rf bc-6.7.5
 
 ## 8.14. Flex-2.6.4
 cd /sources/ && tar -xvf flex-2.6.4.tar.gz && cd flex-2.6.4 
@@ -984,6 +1013,8 @@ make check
 make install
 ln -sv flex   /usr/bin/lex
 ln -sv flex.1 /usr/share/man/man1/lex.1
+cd /sources
+rm -rf flex-2.6.4
 
 ## 8.15. Tcl-8.6.13
 cd /sources/ && tar -xvf tcl8.6.13-src.tar.gz && cd tcl8.6.13
@@ -1022,6 +1053,8 @@ cd ..
 tar -xf ../tcl8.6.13-html.tar.gz --strip-components=1
 mkdir -v -p /usr/share/doc/tcl-8.6.13
 cp -v -r  ./html/* /usr/share/doc/tcl-8.6.13
+cd /sources
+rm -rf  tcl8.6.13
 
 ## 8.16 Expect-5.45.4
 cd /sources/ && tar -xvf expect5.45.4.tar.gz && cd expect5.45.4
@@ -1036,6 +1069,8 @@ make
 make test
 make install
 ln -svf expect5.45.4/libexpect5.45.4.so /usr/lib
+cd /sources
+rm -rf expect5.45.4
 
 ## 8.17. DejaGNU-1.6.3
 cd /sources/ && tar -xvf dejagnu-1.6.3.tar.gz && cd dejagnu-1.6.3
@@ -1048,6 +1083,8 @@ make check
 make install
 install -v -dm755  /usr/share/doc/dejagnu-1.6.3
 install -v -m644   doc/dejagnu.{html,txt} /usr/share/doc/dejagnu-1.6.3
+cd /sources
+rm -rf dejagnu-1.6.3
 
 ## 8.18. Pkgconf-2.1.1
 cd /sources/ && tar -xvf pkgconf-2.1.1.tar.xz && cd pkgconf-2.1.1 
@@ -1058,9 +1095,10 @@ make
 make install
 ln -sv pkgconf   /usr/bin/pkg-config
 ln -sv pkgconf.1 /usr/share/man/man1/pkg-config.1
+cd /sources
+rm -rf pkgconf-2.1.1
 
 ## 8.19. Binutils-2.42
-mv binutils-2.42 binutils-2.42.chapter5
 cd /sources/ && tar -xvf binutils-2.42.tar.xz && cd binutils-2.42
 mkdir -v build
 cd       build
@@ -1184,7 +1222,6 @@ sed -e 's:#ENCRYPT_METHOD DES:ENCRYPT_METHOD YESCRYPT:' \
     -e 's:/var/spool/mail:/var/mail:'                   \
     -e '/PATH=/{s@/sbin:@@;s@/bin:@@}'                  \
     -i etc/login.defs
-sed -i 's:DICTPATH.*:DICTPATH\t/lib/cracklib/pw_dict:' etc/login.defs
 touch /usr/bin/passwd
 ./configure --sysconfdir=/etc   \
             --disable-static    \
@@ -1237,7 +1274,33 @@ make
 ulimit -s 32768
 chown -R tester .
 su tester -c "PATH=$PATH make -k -j4 check"
-../contrib/test_summary
+../contrib/test_summary | grep -A7 Summ
+
+make install
+chown -v -R root:root \
+    /usr/lib/gcc/$(gcc -dumpmachine)/13.2.0/include{,-fixed}
+ln -svr /usr/bin/cpp /usr/lib
+ln -sfv ../../libexec/gcc/$(gcc -dumpmachine)/13.2.0/liblto_plugin.so \
+        /usr/lib/bfd-plugins/
+
+echo 'int main(){}' > dummy.c
+cc dummy.c -v -Wl,--verbose &> dummy.log
+readelf -l a.out | grep ': /lib'
+
+grep -E -o '/usr/lib.*/S?crt[1in].*succeeded' dummy.log
+
+grep -B4 '^ /usr/include' dummy.log
+
+grep 'SEARCH.*/usr/lib' dummy.log |sed 's|; |\n|g'
+
+grep "/lib.*/libc.so.6 " dummy.log
+
+grep found dummy.log
+
+rm -v dummy.c a.out dummy.log
+
+mkdir -pv /usr/share/gdb/auto-load/usr/lib
+mv -v /usr/lib/*gdb.py /usr/share/gdb/auto-load/usr/lib
 
 ## 10.3 Linux-6.6.7
 cp -iv arch/arm64/boot/Image /boot/vmlinuz-6.x-lfs-systemd 

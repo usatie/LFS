@@ -1,0 +1,9 @@
+# 8.84. Cleaning Up
+# Finally, clean up some extra files left over from running tests:
+rm -rf /tmp/*
+# There are also several files in the /usr/lib and /usr/libexec directories with a file name extension of .la. These are "libtool archive" files. On a modern Linux system the libtool .la files are only useful for libltdl. No libraries in LFS are expected to be loaded by libltdl, and it's known that some .la files can break BLFS package builds. Remove those files now:
+find /usr/lib /usr/libexec -name \*.la -delete
+# The compiler built in Chapter 6 and Chapter 7 is still partially installed and not needed anymore. Remove it with:
+find /usr -depth -name $(uname -m)-lfs-linux-gnu\* | xargs rm -rf
+# Finally, remove the temporary 'tester' user account created at the beginning of the previous chapter.
+userdel -r tester
