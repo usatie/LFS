@@ -296,6 +296,7 @@ cat > /etc/fstab << "EOF"
 
 /dev/nvme0n1p4 /              ext4     defaults            1     1
 /dev/nvme0n1p3 swap           swap     pri=1               0     0
+/dev/nvme0n1p5 /boot          ext4     defaults            0     0
 proc           /proc          proc     nosuid,noexec,nodev 0     0
 sysfs          /sys           sysfs    nosuid,noexec,nodev 0     0
 devpts         /dev/pts       devpts   gid=5,mode=620      0     0
@@ -305,4 +306,30 @@ tmpfs          /dev/shm       tmpfs    nosuid,nodev        0     0
 cgroup2        /sys/fs/cgroup cgroup2  nosuid,noexec,nodev 0     0
 
 # End /etc/fstab
+EOF
+
+# 10.3. Linux-6.7.4
+tar -xvf linux-6.7.4.tar.xz
+cd linux-6.7.4
+make mrproper
+make defconfig
+make menuconfig
+make
+make modules_install
+# mkfs -v -t ext4 /dev/nvme0n1p5
+mount /boot
+cp -iv arch/arm64/boot/Image /boot/vmlinuz-6.7.4-lfs-12.1
+cp -iv System.map /boot/System.map-6.7.4
+cp -iv .config /boot/config-6.7.4
+cp -r Documentation -T /usr/share/doc/linux-6.7.4
+
+## 10.3.2. Configuring Linux Module Load Order
+install -v -m755 -d /etc/modprobe.d
+cat > /etc/modprobe.d/usb.conf << "EOF"
+# Begin /etc/modprobe.d/usb.conf
+
+install ohci_hcd /sbin/modprobe ehci_hcd ; /sbin/modprobe -i ohci_hcd ; true
+install uhci_hcd /sbin/modprobe ehci_hcd ; /sbin/modprobe -i uhci_hcd ; true
+
+# End /etc/modprobe.d/usb.conf
 EOF
